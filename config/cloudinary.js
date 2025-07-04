@@ -24,7 +24,7 @@ const storage = new CloudinaryStorage({
 
     return {
       resource_type: "video",
-      folder: "videos",
+      folder: "videos/user_id",
       public_id: `${slug}-${timestamp}-${uuid}`,
     };
   },

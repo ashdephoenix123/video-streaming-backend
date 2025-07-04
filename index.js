@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -5,6 +6,7 @@ const { exec } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const ffmpeg = require("fluent-ffmpeg");
+const { upload, cloudinary } = require("./config/cloudinary");
 
 const app = express();
 const PORT = 5000;
@@ -12,9 +14,6 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 app.use("/streams", express.static(path.join(__dirname, "streams")));
-
-// Video upload config
-const upload = multer({ dest: "uploads/" });
 
 const hasAudioStream = (filePath) => {
   return new Promise((resolve, reject) => {
@@ -57,56 +56,43 @@ app.get("/videos", (req, res) => {
   res.json(videoUrls);
 });
 
-app.post("/upload", upload.single("video"), async (req, res) => {
-  const inputPath = req.file.path;
+app.post("/upload", (req, res) => {
+  upload.single("video")(req, res, async function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message || "Upload failed" });
+    }
 
-  // 🧠 Create a slug from original filename
-  const originalName = path.parse(req.file.originalname).name;
-  const videoSlug = originalName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    if (!req.file) {
+      return res.status(400).json({ error: "No file received" });
+    }
 
-  // 📁 Set output HLS directory
-  const outputDir = path.join(__dirname, "streams", videoSlug);
+    const { title, description } = req.body;
+    const { filename } = req.file;
 
-  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+    try {
+      await cloudinary.uploader.explicit(filename, {
+        resource_type: "video",
+        type: "upload",
+        eager: [
+          {
+            streaming_profile: "auto", // or "auto"
+            format: "m3u8",
+          },
+        ],
+      });
 
-  try {
-    const hasAudio = await hasAudioStream(inputPath);
+      const hlsUrl = `https://res.cloudinary.com/${process.env.CLD_NAME}/video/upload/sp_full_hd/${filename}.m3u8`;
 
-    const mapAudio = hasAudio
-      ? `-map a:0? -c:a:0 aac -map a:0? -c:a:1 aac -map a:0? -c:a:2 aac`
-      : "";
-
-    const varStreamMap = hasAudio
-      ? `"v:0,a:0 v:1,a:1 v:2,a:2"`
-      : `"v:0 v:1 v:2"`;
-
-    const ffmpegCmd = `ffmpeg -i "${inputPath}" \
--filter_complex "[0:v]split=3[v1][v2][v3]; \
-[v1]scale=w=426:h=240[v1out]; \
-[v2]scale=w=640:h=360[v2out]; \
-[v3]scale=w=1280:h=720[v3out]" \
--map "[v1out]" -c:v:0 libx264 -b:v:0 400k ${mapAudio.split(" ")[0] || ""} \
--map "[v2out]" -c:v:1 libx264 -b:v:1 800k ${mapAudio.split(" ")[2] || ""} \
--map "[v3out]" -c:v:2 libx264 -b:v:2 1500k ${mapAudio.split(" ")[4] || ""} \
--f hls -hls_time 10 -hls_playlist_type vod \
--var_stream_map ${varStreamMap} \
--master_pl_name master.m3u8 \
--hls_segment_filename "${outputDir}/v%v/index%d.ts" \
-"${outputDir}/v%v/index.m3u8"`;
-
-    exec(ffmpegCmd, (err, stdout, stderr) => {
-      // fs.unlinkSync(inputPath); // optional cleanup
-      if (err) {
-        console.error("FFmpeg error:", stderr);
-        return res.status(500).json({ error: stderr });
-      }
-      console.log("url: ", `/streams/${videoSlug}/master.m3u8`);
-      res.json({ url: `/streams/${videoSlug}/master.m3u8` });
-    });
-  } catch (err) {
-    console.error("Error probing file:", err);
-    res.status(500).json({ error: "Failed to analyze video file." });
-  }
+      res.json({
+        url: hlsUrl,
+        title,
+        description,
+      });
+    } catch (e) {
+      console.error("❌ HLS generation error:", e);
+      res.status(500).json({ error: "HLS generation failed" });
+    }
+  });
 });
 
 app.listen(PORT, () =>

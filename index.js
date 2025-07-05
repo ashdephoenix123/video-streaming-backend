@@ -3,9 +3,11 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const { errorHandler } = require("./middleware/errorHandler");
+const connectDB = require("./config/dbConnection");
 
 const app = express();
 const PORT = 5000;
+connectDB();
 
 app.use(cors());
 app.use(express.json());

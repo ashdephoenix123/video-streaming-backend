@@ -35,6 +35,10 @@ const registerUser = asyncHandler(async (req, res) => {
   res.status(201).json(createUser);
 });
 
+// @desc login user
+// @route POST /api/user/login
+// @access public
+
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -55,14 +59,29 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   const userDetails = {
+    userId: findUser.id,
     username: findUser.username,
     email,
     createdAt: findUser.createdAt,
   };
 
-  const token = jwt.sign(userDetails, jwt_secret, { expiresIn: "24h" });
+  const token = jwt.sign(userDetails, jwt_secret, { expiresIn: "1m" });
 
   res.status(200).json({ ...userDetails, token });
 });
 
-module.exports = { registerUser, loginUser };
+// @desc get user
+// @route GET /api/user/:id
+// @access private
+
+const getUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found!");
+  }
+  res.status(200).json(user);
+});
+
+module.exports = { registerUser, loginUser, getUser };

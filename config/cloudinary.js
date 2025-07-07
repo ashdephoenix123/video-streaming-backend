@@ -13,6 +13,8 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     const rawTitle = req.headers["x-title"] || "untitled";
+    const userId = req.headers["x-user-id"] || "anonymous";
+
     const slug = rawTitle
       .toLowerCase()
       .trim()
@@ -24,7 +26,7 @@ const storage = new CloudinaryStorage({
 
     return {
       resource_type: "video",
-      folder: "videos/user_id",
+      folder: `videos/${userId}`,
       public_id: `${slug}-${timestamp}-${uuid}`,
     };
   },

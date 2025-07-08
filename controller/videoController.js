@@ -1,11 +1,13 @@
 const fs = require("fs");
 const path = require("path");
+const Video = require("../models/VideoModel");
 
 // @desc Get Videos
 // @route /api/videos
 // @access public
 
 const { upload, cloudinary } = require("../config/cloudinary");
+const asyncHandler = require("express-async-handler");
 
 const getVideos = (req, res) => {
   const streamsPath =
@@ -29,22 +31,19 @@ const getVideos = (req, res) => {
 };
 
 // @desc Get single Videos
-// @route /api/video
+// @route /api/video/:slug
 // @access public
 
-const getVideo = (req, res) => {
+const getVideo = asyncHandler(async (req, res) => {
   const slug = req.params.slug;
-  const videoPath = path.join(
-    "C:\\Projects\\tests\\video-streaming-app\\backend\\streams",
-    slug,
-    "master.m3u8"
-  );
-
-  if (!fs.existsSync(videoPath)) {
-    return res.status(404).json({ error: "Video not found" });
+  const video = await Video.find({ slug });
+  console.log(111, video);
+  if (!video) {
+    res.status(404);
+    throw new Error("Not found!");
   }
-  res.json({ url: `/streams/${req.params.slug}/master.m3u8` });
-};
+  res.status(200).json(video[0]);
+});
 
 // @desc POST video
 // @route /api/upload
@@ -60,7 +59,7 @@ const uploadVideo = (req, res) => {
       return res.status(400).json({ error: "No file received" });
     }
 
-    const { title, description } = req.body;
+    const { title, description, userId } = req.body;
     const { filename } = req.file;
 
     try {
@@ -77,10 +76,24 @@ const uploadVideo = (req, res) => {
 
       const hlsUrl = `https://res.cloudinary.com/${process.env.CLD_NAME}/video/upload/sp_full_hd/${filename}.m3u8`;
 
+      const vidData = {
+        userId,
+        title,
+        description,
+        hlsUrl,
+        publicId: filename,
+      };
+      const video = await Video.create(vidData);
+      if (!video) {
+        res.status(400);
+        throw new Error("Video Upload Failed.");
+      }
+
       res.json({
         url: hlsUrl,
         title,
         description,
+        publicId: filename,
       });
     } catch (e) {
       console.error("❌ HLS generation error:", e);

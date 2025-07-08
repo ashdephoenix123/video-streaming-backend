@@ -2,6 +2,8 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { cloudinary } = require("../config/cloudinary");
+const Video = require("../models/VideoModel");
 
 const saltRounds = 10;
 const jwt_secret = process.env.JWT_SECRET;
@@ -65,7 +67,7 @@ const loginUser = asyncHandler(async (req, res) => {
     createdAt: findUser.createdAt,
   };
 
-  const token = jwt.sign(userDetails, jwt_secret, { expiresIn: "1m" });
+  const token = jwt.sign(userDetails, jwt_secret, { expiresIn: "24h" });
 
   res.status(200).json({ ...userDetails, token });
 });
@@ -84,4 +86,24 @@ const getUser = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
-module.exports = { registerUser, loginUser, getUser };
+// @desc get user videos
+// @route GET /api/user/videos/:userId
+// @access private
+
+const getUserVideos = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
+  const { userId } = req.params;
+  const videos = await Video.find({ userId })
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+  if (!videos) {
+    res.status(400);
+    throw new Error("Error fetching User uploaded videos.");
+  }
+  res.status(200).json(videos);
+});
+
+module.exports = { registerUser, loginUser, getUser, getUserVideos };

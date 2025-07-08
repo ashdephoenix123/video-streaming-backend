@@ -1,34 +1,28 @@
 const fs = require("fs");
 const path = require("path");
 const Video = require("../models/VideoModel");
+const { upload, cloudinary } = require("../config/cloudinary");
+const asyncHandler = require("express-async-handler");
 
 // @desc Get Videos
 // @route /api/videos
 // @access public
 
-const { upload, cloudinary } = require("../config/cloudinary");
-const asyncHandler = require("express-async-handler");
+const getVideos = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
 
-const getVideos = (req, res) => {
-  const streamsPath =
-    "C:\\Projects\\tests\\video-streaming-app\\backend\\streams";
-  if (!fs.existsSync(streamsPath)) {
-    return res.json([]);
+  const videos = await Video.find()
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  if (!videos) {
+    res.status(400);
+    throw new Error("Error fetching videos.");
   }
-
-  const videos = fs.readdirSync(streamsPath).filter((folder) => {
-    const masterPath = path.join(streamsPath, folder, "master.m3u8");
-    return fs.existsSync(masterPath);
-  });
-
-  // Return URLs
-  const videoUrls = videos.map((slug) => ({
-    slug,
-    url: `/streams/${slug}/master.m3u8`,
-  }));
-
-  res.json(videoUrls);
-};
+  res.status(200).json(videos);
+});
 
 // @desc Get single Videos
 // @route /api/video/:slug

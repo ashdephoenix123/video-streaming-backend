@@ -10,7 +10,12 @@ const app = express();
 const PORT = 5000;
 connectDB();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use("/streams", express.static(path.join(__dirname, "streams")));
 app.use("/api", require("./routes/videosRoute"));

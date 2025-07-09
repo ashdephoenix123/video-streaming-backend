@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { cloudinary } = require("../config/cloudinary");
 const Video = require("../models/VideoModel");
+const { serialize } = require("cookie");
 
 const saltRounds = 10;
 const jwt_secret = process.env.JWT_SECRET;
@@ -69,6 +70,15 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const token = jwt.sign(userDetails, jwt_secret, { expiresIn: "24h" });
 
+  const serialized = serialize("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV == "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24,
+    path: "/",
+  });
+
+  res.setHeader("Set-Cookie", serialized);
   res.status(200).json({ ...userDetails, token });
 });
 

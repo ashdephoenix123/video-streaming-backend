@@ -82,6 +82,23 @@ const loginUser = asyncHandler(async (req, res) => {
   res.status(200).json({ ...userDetails, token });
 });
 
+// @desc logout user
+// @route POST /api/user/logout
+// @access public
+
+const logOut = asyncHandler(async (req, res) => {
+  const serialized = serialize("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    expires: new Date(0),
+    path: "/",
+  });
+
+  res.setHeader("Set-Cookie", serialized);
+  res.status(200).json({ message: "Logged out" });
+});
+
 // @desc get user
 // @route GET /api/user/:id
 // @access private
@@ -116,4 +133,4 @@ const getUserVideos = asyncHandler(async (req, res) => {
   res.status(200).json(videos);
 });
 
-module.exports = { registerUser, loginUser, getUser, getUserVideos };
+module.exports = { registerUser, loginUser, logOut, getUser, getUserVideos };

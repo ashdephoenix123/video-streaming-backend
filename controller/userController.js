@@ -79,7 +79,7 @@ const loginUser = asyncHandler(async (req, res) => {
   });
 
   res.setHeader("Set-Cookie", serialized);
-  res.status(200).json({ ...userDetails, token });
+  res.status(200).json({ ...userDetails });
 });
 
 // @desc logout user

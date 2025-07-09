@@ -22,6 +22,7 @@ app.use(express.json());
 app.use("/streams", express.static(path.join(__dirname, "streams")));
 app.use("/api", require("./routes/videosRoute"));
 app.use("/api/user", require("./routes/userRoute"));
+app.use("/api/auth", require("./routes/auth"));
 app.use(errorHandler);
 app.use(verifyToken);
 

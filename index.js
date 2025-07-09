@@ -5,6 +5,7 @@ const path = require("path");
 const { errorHandler } = require("./middleware/errorHandler");
 const connectDB = require("./config/dbConnection");
 const verifyToken = require("./middleware/verifyToken");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const PORT = 5000;
@@ -16,6 +17,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(cookieParser());
 app.use(express.json());
 app.use("/streams", express.static(path.join(__dirname, "streams")));
 app.use("/api", require("./routes/videosRoute"));

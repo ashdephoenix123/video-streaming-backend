@@ -32,6 +32,24 @@ const storage = new CloudinaryStorage({
   },
 });
 
-const upload = multer({ storage });
+const imgStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    const userId = req.user.userId || "anonymous";
+    return {
+      resource_type: "image",
+      folder: `user-images`,
+      public_id: userId,
+      allowed_formats: ["jpeg", "png", "jpg", "webp"],
+      transformation: [{ width: 300, height: 300, crop: "fill" }],
+    };
+  },
+});
 
-module.exports = { cloudinary, upload };
+const upload = multer({ storage });
+const uploadImage = multer({
+  storage: imgStorage,
+  limits: { fileSize: 2 * 1024 * 1024 },
+});
+
+module.exports = { cloudinary, upload, uploadImage };

@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { cloudinary } = require("../config/cloudinary");
+const { cloudinary, uploadImage } = require("../config/cloudinary");
 const Video = require("../models/VideoModel");
 const { serialize } = require("cookie");
 
@@ -66,6 +66,7 @@ const loginUser = asyncHandler(async (req, res) => {
     username: findUser.username,
     email,
     createdAt: findUser.createdAt,
+    avatarURL: findUser.avatarURL,
   };
 
   const token = jwt.sign(userDetails, jwt_secret, { expiresIn: "24h" });
@@ -133,4 +134,35 @@ const getUserVideos = asyncHandler(async (req, res) => {
   res.status(200).json(videos);
 });
 
-module.exports = { registerUser, loginUser, logOut, getUser, getUserVideos };
+// @desc Post user avatar
+// @route GET /api/user/upload-avatar
+// @access private
+
+const uploadAvatar = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file received" });
+  }
+
+  const imageUrl = req.file.path;
+  const user = await User.findByIdAndUpdate(
+    req.user.userId,
+    { avatarURL: imageUrl },
+    { new: true }
+  );
+
+  if (!user) {
+    res.status(400);
+    throw new Error("Upload failed!");
+  }
+
+  return res.json({ imageUrl: user?.avatarURL });
+});
+
+module.exports = {
+  registerUser,
+  loginUser,
+  logOut,
+  getUser,
+  getUserVideos,
+  uploadAvatar,
+};

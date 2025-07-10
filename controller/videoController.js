@@ -43,7 +43,7 @@ const getVideo = asyncHandler(async (req, res) => {
 // @route /api/upload
 // @access public
 
-const uploadVideo = (req, res) => {
+const uploadVideo = asyncHandler((req, res) => {
   upload.single("video")(req, res, async function (err) {
     if (err) {
       return res.status(500).json({ error: err.message || "Upload failed" });
@@ -94,6 +94,6 @@ const uploadVideo = (req, res) => {
       res.status(500).json({ error: "HLS generation failed" });
     }
   });
-};
+});
 
 module.exports = { getVideos, getVideo, uploadVideo };

@@ -111,7 +111,15 @@ const getUser = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User not found!");
   }
-  res.status(200).json(user);
+
+  const userDetails = {
+    userId: user.id,
+    username: user.username,
+    email: user.email,
+    createdAt: user.createdAt,
+    avatarURL: user.avatarURL,
+  };
+  res.status(200).json(userDetails);
 });
 
 // @desc get user videos

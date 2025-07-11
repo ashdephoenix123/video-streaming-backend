@@ -13,6 +13,7 @@ const getVideos = asyncHandler(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
 
   const videos = await Video.find()
+    .populate("userId", "username avatarURL")
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
     .limit(limit);
@@ -30,8 +31,11 @@ const getVideos = asyncHandler(async (req, res) => {
 
 const getVideo = asyncHandler(async (req, res) => {
   const slug = req.params.slug;
-  const video = await Video.find({ slug });
-  console.log(111, video);
+  const video = await Video.find({ slug }).populate(
+    "userId",
+    "username avatarURL"
+  );
+
   if (!video) {
     res.status(404);
     throw new Error("Not found!");

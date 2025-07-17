@@ -21,6 +21,18 @@ const UserSchema = new Schema(
       type: String,
       default: null,
     },
+    likedVideos: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Video",
+      },
+    ],
+    savedVideos: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Video",
+      },
+    ],
   },
   { timestamps: true }
 );

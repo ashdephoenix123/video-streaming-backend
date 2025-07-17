@@ -166,6 +166,60 @@ const uploadAvatar = asyncHandler(async (req, res) => {
   return res.json({ imageUrl: user?.avatarURL });
 });
 
+const likeOrSaveVideo = asyncHandler(async (req, res) => {
+  const { userId, mediaId } = req.body;
+
+  const action = req.body.action?.toLowerCase();
+
+  if (!userId || !mediaId || !action) {
+    res.status(400);
+    throw new Error("Missing required fields");
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found!");
+  }
+
+  if (action === "like") {
+    const alreadyLiked = user.likedVideos.includes(mediaId);
+    if (!alreadyLiked) {
+      user.likedVideos.push(mediaId);
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "Video saved to Liked videos!", status: true });
+    } else {
+      user.likedVideos = user.likedVideos.filter(
+        (vidId) => vidId.toString() != mediaId.toString()
+      );
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "Video removed from Liked videos!", status: false });
+    }
+  } else if (action === "save") {
+    const alreadySaved = user.savedVideos.includes(mediaId);
+    if (!alreadySaved) {
+      user.savedVideos.push(mediaId);
+      await user.save();
+      return res.status(200).json({ message: "Video saved!", status: true });
+    } else {
+      user.savedVideos = user.savedVideos.filter(
+        (vidId) => vidId.toString() != mediaId.toString()
+      );
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "Video removed from Saved!", status: false });
+    }
+  } else {
+    res.status(400);
+    throw new Error("Invalid action");
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -173,4 +227,5 @@ module.exports = {
   getUser,
   getUserVideos,
   uploadAvatar,
+  likeOrSaveVideo,
 };

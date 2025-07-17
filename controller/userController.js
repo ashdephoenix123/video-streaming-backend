@@ -220,6 +220,29 @@ const likeOrSaveVideo = asyncHandler(async (req, res) => {
   }
 });
 
+const getLikedVideos = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    res.status(400);
+    throw new Error("UserID not given!");
+  }
+
+  try {
+    const user = await User.findById(userId).populate("likedVideos");
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found!");
+    }
+
+    return res.status(200).json({ likedVideos: user.likedVideos });
+  } catch (err) {
+    console.error("Error fetching liked videos:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -228,4 +251,5 @@ module.exports = {
   getUserVideos,
   uploadAvatar,
   likeOrSaveVideo,
+  getLikedVideos,
 };

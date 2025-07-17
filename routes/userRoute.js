@@ -7,6 +7,7 @@ const {
   logOut,
   uploadAvatar,
   likeOrSaveVideo,
+  getLikedVideos,
 } = require("../controller/userController");
 const verifyToken = require("../middleware/verifyToken");
 const { uploadImage } = require("../config/cloudinary");
@@ -24,5 +25,6 @@ router.post(
   uploadAvatar
 );
 router.post("/likeOrSave", verifyToken, likeOrSaveVideo);
+router.get("/likedVideos/:userId", verifyToken, getLikedVideos);
 
 module.exports = router;

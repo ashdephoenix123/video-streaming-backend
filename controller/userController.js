@@ -229,7 +229,11 @@ const getLikedVideos = asyncHandler(async (req, res) => {
       throw new Error("User not found!");
     }
 
-    return res.status(200).json({ likedVideos: user.likedVideos });
+    return res.status(200).json({
+      userName: user.username,
+      userAvatar: user.avatarURL,
+      likedVideos: user.likedVideos,
+    });
   } catch (err) {
     console.error("Error fetching liked videos:", err);
     return res.status(500).json({ message: "Internal server error" });
@@ -245,7 +249,13 @@ const getSavedVideos = asyncHandler(async (req, res) => {
       throw new Error("User not found!");
     }
 
-    return res.status(200).json({ savedVideos: user.savedVideos });
+    return res
+      .status(200)
+      .json({
+        userName: user.username,
+        userAvatar: user.avatarURL,
+        savedVideos: user.savedVideos,
+      });
   } catch (err) {
     console.error("Error fetching saved videos:", err);
     return res.status(500).json({ message: "Internal server error" });

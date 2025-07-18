@@ -221,15 +221,8 @@ const likeOrSaveVideo = asyncHandler(async (req, res) => {
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-  const { userId } = req.params;
-
-  if (!userId) {
-    res.status(400);
-    throw new Error("UserID not given!");
-  }
-
   try {
-    const user = await User.findById(userId).populate("likedVideos");
+    const user = await User.findById(req.user.userId).populate("likedVideos");
 
     if (!user) {
       res.status(404);
@@ -243,6 +236,22 @@ const getLikedVideos = asyncHandler(async (req, res) => {
   }
 });
 
+const getSavedVideos = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).populate("savedVideos");
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found!");
+    }
+
+    return res.status(200).json({ savedVideos: user.savedVideos });
+  } catch (err) {
+    console.error("Error fetching saved videos:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -252,4 +261,5 @@ module.exports = {
   uploadAvatar,
   likeOrSaveVideo,
   getLikedVideos,
+  getSavedVideos,
 };

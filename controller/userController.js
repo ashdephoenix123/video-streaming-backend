@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const { cloudinary, uploadImage } = require("../config/cloudinary");
 const Video = require("../models/VideoModel");
 const { serialize } = require("cookie");
+const HistoryModel = require("../models/HistoryModel");
 
 const saltRounds = 10;
 const jwt_secret = process.env.JWT_SECRET;
@@ -249,17 +250,53 @@ const getSavedVideos = asyncHandler(async (req, res) => {
       throw new Error("User not found!");
     }
 
-    return res
-      .status(200)
-      .json({
-        userName: user.username,
-        userAvatar: user.avatarURL,
-        savedVideos: user.savedVideos,
-      });
+    return res.status(200).json({
+      userName: user.username,
+      userAvatar: user.avatarURL,
+      savedVideos: user.savedVideos,
+    });
   } catch (err) {
     console.error("Error fetching saved videos:", err);
     return res.status(500).json({ message: "Internal server error" });
   }
+});
+
+const addVideoToHistory = asyncHandler(async (req, res) => {
+  const { userId, videoId } = req.body;
+
+  if (!userId || !videoId) {
+    res.status(400);
+    throw new Error("UserId and VideoId are not provided!");
+  }
+  const userHistory = await HistoryModel.findOne({ userId });
+
+  if (userHistory) {
+    userHistory.history = userHistory.history.filter(
+      (item) => item.videoId.toString() !== videoId
+    );
+
+    userHistory.history.unshift({ videoId });
+    if (userHistory.history.length > 50) userHistory.history.pop();
+    await userHistory.save();
+  } else {
+    await HistoryModel.create({
+      userId,
+      history: [{ videoId }],
+    });
+  }
+
+  res.status(200).json({ message: "History updated" });
+});
+
+const getUserHistory = asyncHandler(async (req, res) => {
+  const history = await HistoryModel.findOne({
+    userId: req.user.userId,
+  })
+    .populate("history.videoId")
+    .lean();
+
+  if (!history) return res.status(200).json([]);
+  res.status(200).json(history.history);
 });
 
 module.exports = {
@@ -272,4 +309,6 @@ module.exports = {
   likeOrSaveVideo,
   getLikedVideos,
   getSavedVideos,
+  addVideoToHistory,
+  getUserHistory,
 };

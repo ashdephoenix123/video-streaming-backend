@@ -9,6 +9,8 @@ const {
   likeOrSaveVideo,
   getLikedVideos,
   getSavedVideos,
+  addVideoToHistory,
+  getUserHistory,
 } = require("../controller/userController");
 const verifyToken = require("../middleware/verifyToken");
 const { uploadImage } = require("../config/cloudinary");
@@ -28,5 +30,7 @@ router.post(
 router.post("/likeOrSave", verifyToken, likeOrSaveVideo);
 router.get("/likedVideos/user", verifyToken, getLikedVideos);
 router.get("/savedVideos/user", verifyToken, getSavedVideos);
+router.post("/history", verifyToken, addVideoToHistory);
+router.get("/history/user", verifyToken, getUserHistory);
 
 module.exports = router;

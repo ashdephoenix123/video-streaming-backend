@@ -288,15 +288,43 @@ const addVideoToHistory = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "History updated" });
 });
 
+const removeVideoFromHistory = asyncHandler(async (req, res) => {
+  const { videoId } = req.body;
+
+  if (!req.user.userId || !videoId) {
+    res.status(400);
+    throw new Error("UserId and VideoId are not provided!");
+  }
+  const userHistory = await HistoryModel.findOne({ userId: req.user.userId });
+
+  if (userHistory) {
+    userHistory.history = userHistory.history.filter(
+      (item) => item.videoId.toString() !== videoId
+    );
+
+    await userHistory.save();
+  } else {
+    res.status(404);
+    throw new Error("User History not found!");
+  }
+
+  res.status(200).json({ message: "Removed video from history!" });
+});
+
 const getUserHistory = asyncHandler(async (req, res) => {
   const history = await HistoryModel.findOne({
     userId: req.user.userId,
   })
     .populate("history.videoId")
+    .populate("userId", "username avatarURL")
     .lean();
 
   if (!history) return res.status(200).json([]);
-  res.status(200).json(history.history);
+  res.status(200).json({
+    userName: history.userId.username,
+    userAvatar: history.userId.avatarURL,
+    historyVideos: history.history.map((content) => content.videoId),
+  });
 });
 
 module.exports = {
@@ -311,4 +339,5 @@ module.exports = {
   getSavedVideos,
   addVideoToHistory,
   getUserHistory,
+  removeVideoFromHistory,
 };

@@ -1,5 +1,5 @@
 This is a backend codebase of the project **FlixStream**. <br />
-Frontend Github [link](https://github.com/ashdephoenix123/video-streaming-frontend)
+Frontend Github [`link`](https://github.com/ashdephoenix123/video-streaming-frontend)
 
 ## Environment Variables
 ```bash

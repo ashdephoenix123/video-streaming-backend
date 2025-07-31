@@ -17,5 +17,5 @@ Cloudinary for Image and Video processing.
 MongoDB
 
 More Info - For Personal Use:
-Deployed on Render via primary Gmail.
-Cloudinary account with primary Github.
+- Deployed on Render via primary Gmail.
+- Cloudinary account with primary Github.

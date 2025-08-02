@@ -24,6 +24,9 @@ const router = express.Router();
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logOut);
+router.post("/subscribe", subscribeToUser);
+router.post("/subscribe/getSubscriptionDetail", getSubDetails);
+
 router.get("/:id", verifyToken, getUser);
 router.get("/videos/:userId", verifyToken, getUserVideos);
 router.post(
@@ -38,9 +41,7 @@ router.get("/savedVideos/user", verifyToken, getSavedVideos);
 router.post("/history", verifyToken, addVideoToHistory);
 router.get("/history/user", verifyToken, getUserHistory);
 router.post("/history/remove", verifyToken, removeVideoFromHistory);
-router.post("/subscribe", subscribeToUser);
 router.post("/subscribe/getStatus", verifyToken, checkSubscription);
 router.get("/subscribe/mySubscriptions", verifyToken, getUserSubscription);
-router.get("/subscribe/getSubscriptionDetail", getSubDetails);
 
 module.exports = router;

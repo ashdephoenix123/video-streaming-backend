@@ -377,13 +377,15 @@ const getUserSubscription = asyncHandler(async (req, res) => {
 
 const getSubDetails = asyncHandler(async (req, res) => {
   const { userId } = req.body;
-  const [user, videos] = await Promise.all(
+  const [user, videos] = await Promise.all([
     User.findById(userId),
-    Video.find({ userId })
-  );
+    Video.find({ userId }),
+  ]);
 
   if (user && videos) {
     return res.status(200).json({ user, videos });
+  } else {
+    return res.status(400).json({ message: "Not available!" });
   }
 });
 

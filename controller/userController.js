@@ -375,6 +375,18 @@ const getUserSubscription = asyncHandler(async (req, res) => {
   return res.status(200).json(result);
 });
 
+const getSubDetails = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+  const [user, videos] = await Promise.all(
+    User.findById(userId),
+    Video.find({ userId })
+  );
+
+  if (user && videos) {
+    return res.status(200).json({ user, videos });
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -391,4 +403,5 @@ module.exports = {
   subscribeToUser,
   checkSubscription,
   getUserSubscription,
+  getSubDetails,
 };

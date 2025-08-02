@@ -15,6 +15,7 @@ const {
   subscribeToUser,
   checkSubscription,
   getUserSubscription,
+  getSubDetails,
 } = require("../controller/userController");
 const verifyToken = require("../middleware/verifyToken");
 const { uploadImage } = require("../config/cloudinary");
@@ -40,5 +41,6 @@ router.post("/history/remove", verifyToken, removeVideoFromHistory);
 router.post("/subscribe", subscribeToUser);
 router.post("/subscribe/getStatus", verifyToken, checkSubscription);
 router.get("/subscribe/mySubscriptions", verifyToken, getUserSubscription);
+router.get("/subscribe/getSubscriptionDetail", getSubDetails);
 
 module.exports = router;

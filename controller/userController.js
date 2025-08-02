@@ -92,7 +92,7 @@ const logOut = asyncHandler(async (req, res) => {
   const serialized = serialize("token", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV == "production" ? "none" : "lax",
     expires: new Date(0),
     path: "/",
   });

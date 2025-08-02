@@ -6,6 +6,7 @@ const { cloudinary, uploadImage } = require("../config/cloudinary");
 const Video = require("../models/VideoModel");
 const { serialize } = require("cookie");
 const HistoryModel = require("../models/HistoryModel");
+const SubscriptionModel = require("../models/SubscriptionModel");
 
 const saltRounds = 10;
 const jwt_secret = process.env.JWT_SECRET;
@@ -327,6 +328,53 @@ const getUserHistory = asyncHandler(async (req, res) => {
   });
 });
 
+const subscribeToUser = asyncHandler(async (req, res) => {
+  const { userId, subscriberId } = req.body;
+  if (!userId || !subscriberId) {
+    res.status(400);
+    throw new Error(
+      "Subscriber ID and the ID of the user to whom subscribing are required"
+    );
+  }
+
+  const isSubscribed = await SubscriptionModel.findOne({
+    userId,
+    subscriberId,
+  });
+  if (!isSubscribed) {
+    const subscribed = await SubscriptionModel.create({
+      userId,
+      subscriberId,
+    });
+
+    res.status(201).json({ message: "Subscribed successfully" });
+  } else {
+    await SubscriptionModel.deleteOne({ userId, subscriberId });
+    res.status(200).json({ message: "Unsubscribed successfully" });
+  }
+});
+
+const checkSubscription = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+  const isSubscribed = await SubscriptionModel.findOne({
+    userId,
+    subscriberId: req.user.userId,
+  });
+
+  if (isSubscribed) {
+    return res.status(200).json({ subscribed: true });
+  } else {
+    return res.status(200).json({ subscribed: false });
+  }
+});
+
+const getUserSubscription = asyncHandler(async (req, res) => {
+  const result = await SubscriptionModel.find({
+    subscriberId: req.user.userId,
+  }).populate({ path: "userId", select: "username avatarURL _id" });
+  return res.status(200).json(result);
+});
+
 module.exports = {
   registerUser,
   loginUser,
@@ -340,4 +388,7 @@ module.exports = {
   addVideoToHistory,
   getUserHistory,
   removeVideoFromHistory,
+  subscribeToUser,
+  checkSubscription,
+  getUserSubscription,
 };

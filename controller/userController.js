@@ -72,14 +72,17 @@ const loginUser = asyncHandler(async (req, res) => {
   };
 
   const token = jwt.sign(userDetails, jwt_secret, { expiresIn: "24h" });
-
-  const serialized = serialize("token", token, {
+  const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV == "production",
     sameSite: process.env.NODE_ENV == "production" ? "none" : "lax",
     maxAge: 60 * 60 * 24,
     path: "/",
-  });
+  };
+  console.log("token", token);
+  console.log("options", options);
+
+  const serialized = serialize("token", token, options);
 
   res.setHeader("Set-Cookie", serialized);
   res.status(200).json({ ...userDetails });

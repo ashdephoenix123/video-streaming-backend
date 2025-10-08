@@ -4,6 +4,11 @@ const Video = require("../models/VideoModel");
 const { upload, cloudinary } = require("../config/cloudinary");
 const asyncHandler = require("express-async-handler");
 
+// Test
+const isitworking = asyncHandler(async (req, res) => {
+  res.status(200).json({ message: "Yes, It is Working!" });
+});
+
 // @desc Get Videos
 // @route /api/videos
 // @access public
@@ -100,4 +105,4 @@ const uploadVideo = asyncHandler((req, res) => {
   });
 });
 
-module.exports = { getVideos, getVideo, uploadVideo };
+module.exports = { isitworking, getVideos, getVideo, uploadVideo };

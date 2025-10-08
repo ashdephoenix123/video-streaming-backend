@@ -8,7 +8,7 @@ const verifyToken = require("./middleware/verifyToken");
 const cookieParser = require("cookie-parser");
 
 const app = express();
-const PORT = 5000;
+const port = process.env.PORT || 5000;
 connectDB();
 
 app.use(
@@ -26,6 +26,6 @@ app.use("/api/user", require("./routes/userRoute"));
 app.use("/api/auth", require("./routes/auth"));
 app.use(errorHandler);
 
-app.listen(PORT, () =>
-  console.log(`Backend running on http://localhost:${PORT}`)
+app.listen(port, () =>
+  console.log(`Backend running on http://localhost:${port}`)
 );

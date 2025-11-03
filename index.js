@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const { errorHandler } = require("./middleware/errorHandler");
 const connectDB = require("./config/dbConnection");
-const verifyToken = require("./middleware/verifyToken");
+// const verifyToken = require("./middleware/verifyToken");
 const cookieParser = require("cookie-parser");
 
 const app = express();

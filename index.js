@@ -4,7 +4,6 @@ const cors = require("cors");
 const path = require("path");
 const { errorHandler } = require("./middleware/errorHandler");
 const connectDB = require("./config/dbConnection");
-// const verifyToken = require("./middleware/verifyToken");
 const cookieParser = require("cookie-parser");
 
 const app = express();
@@ -21,7 +20,6 @@ app.use(cookieParser());
 app.use(express.json());
 app.use("/streams", express.static(path.join(__dirname, "streams")));
 app.use("/api", require("./routes/videosRoute"));
-// app.use(verifyToken); // this will apply the middleware on every api defined below, so apply this middleware on route level and not in global level.
 app.use("/api/user", require("./routes/userRoute"));
 app.use("/api/auth", require("./routes/auth"));
 app.use(errorHandler);

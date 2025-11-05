@@ -2,7 +2,6 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { cloudinary, uploadImage } = require("../config/cloudinary");
 const Video = require("../models/VideoModel");
 const { serialize } = require("cookie");
 const HistoryModel = require("../models/HistoryModel");

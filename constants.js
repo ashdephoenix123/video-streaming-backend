@@ -1,9 +1,9 @@
-const errors = {
-  VALIDATION_ERR: 400,
+const HTTP_ERRORS = {
+  BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
-  SERVER_ERR: 404,
+  INTERNAL_SERVER_ERROR: 500,
 };
 
-module.exports = errors;
+module.exports = HTTP_ERRORS;

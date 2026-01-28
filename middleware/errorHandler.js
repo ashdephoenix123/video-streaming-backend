@@ -1,53 +1,44 @@
-const errors = require("../constants");
+const HTTP_ERRORS = require("../constants");
 
 const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode || 500;
+  const statusCode =
+    res.statusCode !== 200 ? res.statusCode : HTTP_ERRORS.INTERNAL_SERVER_ERROR;
   console.log("Error from error handler", err);
 
+  let title = "";
+
   switch (statusCode) {
-    case errors.VALIDATION_ERR:
-      res.json({
-        title: "Validation error",
-        message: err.message,
-        error: err.stack,
-      });
+    case HTTP_ERRORS.BAD_REQUEST:
+      title = "Validation error";
       break;
 
-    case errors.UNAUTHORIZED:
-      res.json({
-        title: "Unauthorized",
-        message: err.message,
-        error: err.stack,
-      });
+    case HTTP_ERRORS.UNAUTHORIZED:
+      title = "Unauthorized";
       break;
 
-    case errors.FORBIDDEN:
-      res.json({
-        title: "Forbidden",
-        message: err.message,
-        error: err.stack,
-      });
+    case HTTP_ERRORS.FORBIDDEN:
+      title = "Forbidden";
       break;
 
-    case errors.NOT_FOUND:
-      res.json({
-        title: "Not Found",
-        message: err.message,
-        error: err.stack,
-      });
+    case HTTP_ERRORS.NOT_FOUND:
+      title = "Not Found";
       break;
 
-    case errors.SERVER_ERR:
-      res.json({
-        title: "Sever Error",
-        message: err.message,
-        error: err.stack,
-      });
+    case HTTP_ERRORS.INTERNAL_SERVER_ERROR:
+      title = "Internal Sever Error";
       break;
 
     default:
-      console.log("All good!");
+      title = "Internal Sever Error";
   }
+
+  let response = {
+    title,
+    message: err.message,
+    ...(process.env.NODE_ENV !== "production" ? { error: err.stack } : {}),
+  };
+
+  return res.status(statusCode).json(response);
 };
 
 module.exports = { errorHandler };

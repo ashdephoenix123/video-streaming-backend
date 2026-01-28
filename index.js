@@ -28,19 +28,19 @@ const startServer = async () => {
     cors({
       origin: ["http://localhost:3000", "https://flix-stream-azure.vercel.app"],
       credentials: true,
-    })
+    }),
   );
 
   app.use(cookieParser());
   app.use(express.json());
-  app.use("/streams", express.static(path.join(__dirname, "streams")));
-  app.use("/api", require("./routes/videosRoute"));
-  app.use("/api/user", require("./routes/userRoute"));
+
   app.use("/api/auth", require("./routes/auth"));
+  app.use("/api/user", require("./routes/userRoute"));
+  app.use("/api", require("./routes/videosRoute"));
   app.use(errorHandler);
 
   app.listen(port, () =>
-    console.log(`Backend running on http://localhost:${port}`)
+    console.log(`Backend running on http://localhost:${port}`),
   );
 };
 

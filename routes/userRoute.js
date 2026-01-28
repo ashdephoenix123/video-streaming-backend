@@ -27,13 +27,12 @@ router.post("/logout", logOut);
 router.post("/subscribe", subscribeToUser);
 router.post("/subscribe/getSubscriptionDetail", getSubDetails);
 
-router.get("/:id", verifyToken, getUser);
 router.get("/videos/:userId", verifyToken, getUserVideos);
 router.post(
   "/upload-avatar",
   verifyToken,
   uploadImage.single("avatar"),
-  uploadAvatar
+  uploadAvatar,
 );
 router.post("/likeOrSave", verifyToken, likeOrSaveVideo);
 router.get("/likedVideos/user", verifyToken, getLikedVideos);
@@ -43,5 +42,6 @@ router.get("/history/user", verifyToken, getUserHistory);
 router.post("/history/remove", verifyToken, removeVideoFromHistory);
 router.post("/subscribe/getStatus", verifyToken, checkSubscription);
 router.get("/subscribe/mySubscriptions", verifyToken, getUserSubscription);
+router.get("/:id", verifyToken, getUser);
 
 module.exports = router;

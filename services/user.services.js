@@ -53,9 +53,10 @@ const loginUser = async ({ email, password }) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV == "production",
-    sameSite: "none",
+    sameSite: "lax",
     maxAge: 60 * 60 * 24,
     path: "/",
+    //domain: .yourfrontend.com
   };
   const serialized = serialize("token", token, options);
 
@@ -232,7 +233,7 @@ const fetchSubscriptionDetails = async ({ userId }) => {
   }
 };
 
-const toggleLikeAndSave = async ({ userId, action }) => {
+const toggleLikeAndSave = async ({ userId, action, mediaId }) => {
   const user = await User.findById(userId);
   if (!user) {
     throw new ApiError(HTTP_ERRORS.NOT_FOUND, "user not found!");

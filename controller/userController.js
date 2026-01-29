@@ -119,7 +119,11 @@ const likeOrSaveVideo = asyncHandler(async (req, res) => {
     throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Missing required fields");
   }
 
-  const result = await userServices.toggleLikeAndSave({ userId, action });
+  const result = await userServices.toggleLikeAndSave({
+    userId,
+    action,
+    mediaId,
+  });
   res.status(200).json(result);
 });
 

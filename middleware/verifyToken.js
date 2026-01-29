@@ -5,8 +5,7 @@ const ApiError = require("../utils/ApiError");
 const jwt_secret = process.env.JWT_SECRET;
 
 const verifyToken = asyncHandler(async (req, res, next) => {
-  const token =
-    req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
+  const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     throw new ApiError(HTTP_ERRORS.UNAUTHORIZED, "Auth token not provided!");

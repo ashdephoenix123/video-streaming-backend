@@ -61,12 +61,12 @@ const processAndSaveVideo = async ({
     throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Video Upload Failed.");
   }
 
-  res.json({
+  return {
     url: hlsUrl,
     title,
     description,
     publicId: filename,
-  });
+  };
 };
 
 module.exports = { fetchVideos, getVideo, processAndSaveVideo };

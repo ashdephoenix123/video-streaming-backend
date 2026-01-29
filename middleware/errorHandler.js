@@ -1,9 +1,7 @@
 const HTTP_ERRORS = require("../constants");
 
 const errorHandler = (err, req, res, next) => {
-  const statusCode =
-    res.statusCode !== 200 ? res.statusCode : HTTP_ERRORS.INTERNAL_SERVER_ERROR;
-  console.log("Error from error handler", err);
+  const statusCode = err.statusCode || HTTP_ERRORS.INTERNAL_SERVER_ERROR;
 
   let title = "";
 

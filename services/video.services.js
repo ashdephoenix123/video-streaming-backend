@@ -1,6 +1,7 @@
 const HTTP_ERRORS = require("../constants");
 const Video = require("../models/VideoModel");
 const { cloudinary } = require("../config/cloudinary");
+const ApiError = require("../utils/ApiError");
 
 const fetchVideos = async ({ page, limit }) => {
   const videos = await Video.find()
@@ -10,9 +11,7 @@ const fetchVideos = async ({ page, limit }) => {
     .limit(limit);
 
   if (!videos) {
-    const err = new Error("Error fetching videos.");
-    err.statusCode = HTTP_ERRORS.BAD_REQUEST;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Error fetching videos.");
   }
 
   return videos;
@@ -25,9 +24,7 @@ const getVideo = async ({ slug }) => {
   );
 
   if (!video) {
-    const err = new Error("Not found!");
-    err.statusCode = HTTP_ERRORS.NOT_FOUND;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.NOT_FOUND, "Not found!");
   }
 
   return video[0];
@@ -61,9 +58,7 @@ const processAndSaveVideo = async ({
   };
   const video = await Video.create(vidData);
   if (!video) {
-    const err = new Error("Video Upload Failed.");
-    err.statusCode = 400;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Video Upload Failed.");
   }
 
   res.json({

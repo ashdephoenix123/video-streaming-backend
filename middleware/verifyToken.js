@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
+const HTTP_ERRORS = require("../constants");
+const ApiError = require("../utils/ApiError");
 const jwt_secret = process.env.JWT_SECRET;
 
 const verifyToken = asyncHandler(async (req, res, next) => {
@@ -14,14 +16,12 @@ const verifyToken = asyncHandler(async (req, res, next) => {
       next();
     } catch (error) {
       console.error("Token verification error:", error.message);
-      res.status(401);
-      throw new Error("Token invalid or expired!");
+      throw new ApiError(HTTP_ERRORS.UNAUTHORIZED, "Token invalid or expired!");
     }
   }
 
   if (!token) {
-    res.status(401);
-    throw new Error("Auth token not provided!");
+    throw new ApiError(HTTP_ERRORS.UNAUTHORIZED, "Auth token not provided!");
   }
 });
 

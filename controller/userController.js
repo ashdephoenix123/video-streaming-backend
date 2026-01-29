@@ -7,6 +7,8 @@ const { serialize } = require("cookie");
 const HistoryModel = require("../models/HistoryModel");
 const SubscriptionModel = require("../models/SubscriptionModel");
 const userServices = require("../services/user.services");
+const HTTP_ERRORS = require("../constants");
+const ApiError = require("../utils/ApiError");
 
 // @desc register user
 // @route POST /api/user/register
@@ -15,8 +17,7 @@ const userServices = require("../services/user.services");
 const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
-    res.status(400);
-    throw new Error("All fields are required");
+    throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "All fields are required");
   }
 
   const newUser = await userServices.registerNewUser({
@@ -36,8 +37,10 @@ const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    res.status(400);
-    throw new Error("Email and password are required to login.");
+    throw new ApiError(
+      HTTP_ERRORS.BAD_REQUEST,
+      "Email and password are required to login.",
+    );
   }
 
   const { serialized, userDetails } = await userServices.loginUser({
@@ -113,8 +116,7 @@ const likeOrSaveVideo = asyncHandler(async (req, res) => {
   const action = req.body.action?.toLowerCase();
 
   if (!userId || !mediaId || !action) {
-    res.status(400);
-    throw new Error("Missing required fields");
+    throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Missing required fields");
   }
 
   const result = await userServices.toggleLikeAndSave({ userId, action });
@@ -143,8 +145,10 @@ const addVideoToHistory = asyncHandler(async (req, res) => {
   const { userId, videoId } = req.body;
 
   if (!userId || !videoId) {
-    res.status(400);
-    throw new Error("UserId and VideoId are not provided!");
+    throw new ApiError(
+      HTTP_ERRORS.BAD_REQUEST,
+      "UserId and VideoId are not provided!",
+    );
   }
 
   await userServices.addToUserHistory({ userId, videoId });
@@ -155,8 +159,10 @@ const removeVideoFromHistory = asyncHandler(async (req, res) => {
   const { videoId } = req.body;
 
   if (!req.user.userId || !videoId) {
-    res.status(400);
-    throw new Error("UserId and VideoId are not provided!");
+    throw new ApiError(
+      HTTP_ERRORS.BAD_REQUEST,
+      "UserId and VideoId are not provided!",
+    );
   }
   await userServices.removeFromUserHistory({
     userId: req.user.userId,
@@ -176,8 +182,8 @@ const getUserHistory = asyncHandler(async (req, res) => {
 const subscribeToUser = asyncHandler(async (req, res) => {
   const { userId, subscriberId } = req.body;
   if (!userId || !subscriberId) {
-    res.status(400);
-    throw new Error(
+    throw new ApiError(
+      HTTP_ERRORS.BAD_REQUEST,
       "Subscriber ID and the ID of the user to whom subscribing are required",
     );
   }

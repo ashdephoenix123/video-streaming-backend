@@ -6,6 +6,7 @@ const HistoryModel = require("../models/HistoryModel");
 const SubscriptionModel = require("../models/SubscriptionModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const ApiError = require("../utils/ApiError");
 
 const saltRounds = 10;
 const jwt_secret = process.env.JWT_SECRET;
@@ -14,11 +15,10 @@ const registerNewUser = async ({ username, email, password }) => {
   const existingUser = await User.findOne({ email });
 
   if (existingUser) {
-    const err = new Error(
+    throw new ApiError(
+      HTTP_ERRORS.BAD_REQUEST,
       "Email already registered! Please create with another email.",
     );
-    err.statusCode = HTTP_ERRORS.BAD_REQUEST;
-    throw err;
   }
 
   const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -34,15 +34,11 @@ const registerNewUser = async ({ username, email, password }) => {
 const loginUser = async ({ email, password }) => {
   const findUser = await User.findOne({ email });
   if (!findUser) {
-    const err = new Error("User not Found!");
-    err.statusCode = HTTP_ERRORS.NOT_FOUND;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.NOT_FOUND, "User not Found!");
   }
 
   if (!(await bcrypt.compare(password, findUser.password))) {
-    const err = new Error("Invalid Credentials!");
-    err.statusCode = HTTP_ERRORS.BAD_REQUEST;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.UNAUTHORIZED, "Invalid Credentials!");
   }
 
   const userDetails = {
@@ -69,9 +65,7 @@ const loginUser = async ({ email, password }) => {
 const fetchUserDetails = async ({ id }) => {
   const user = await User.findById(id);
   if (!user) {
-    const err = new Error("User not found!");
-    err.statusCode = HTTP_ERRORS.NOT_FOUND;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.NOT_FOUND, "User not found!");
   }
 
   const userDetails = {
@@ -91,9 +85,10 @@ const fetchUserVideos = async ({ userId, page, limit }) => {
     .skip((page - 1) * limit)
     .limit(limit);
   if (!videos) {
-    const err = new Error("Error fetching User uploaded videos!");
-    err.statusCode = HTTP_ERRORS.BAD_REQUEST;
-    throw err;
+    throw new ApiError(
+      HTTP_ERRORS.BAD_REQUEST,
+      "Error fetching User uploaded videos!",
+    );
   }
 
   return videos;
@@ -107,9 +102,7 @@ const updateUserAvatar = async ({ userId, imageUrl }) => {
   );
 
   if (!user) {
-    const err = new Error("Upload failed!");
-    err.statusCode = HTTP_ERRORS.BAD_REQUEST;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Upload failed!");
   }
 
   return user;
@@ -118,17 +111,13 @@ const updateUserAvatar = async ({ userId, imageUrl }) => {
 const ALLOWED_ACTIVITY_KEYS = ["savedVideos", "likedVideos"];
 const getUserActivityVideos = async ({ userId, key }) => {
   if (!ALLOWED_ACTIVITY_KEYS.includes(key)) {
-    const err = new Error("Invalid activity type");
-    err.statusCode = HTTP_ERRORS.BAD_REQUEST;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Invalid activity type");
   }
 
   const user = await User.findById(userId).populate(key);
 
   if (!user) {
-    const err = new Error("User not found!");
-    err.statusCode = HTTP_ERRORS.NOT_FOUND;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.NOT_FOUND, "User not found!");
   }
 
   let response = {
@@ -169,9 +158,7 @@ const removeFromUserHistory = async ({ userId, videoId }) => {
 
     await userHistory.save();
   } else {
-    const err = new Error("User History not found!");
-    err.statusCode = HTTP_ERRORS.NOT_FOUND;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.NOT_FOUND, "User History not found!");
   }
 };
 
@@ -241,18 +228,14 @@ const fetchSubscriptionDetails = async ({ userId }) => {
   if (user && videos) {
     return { user, videos };
   } else {
-    const err = new Error("Not available!");
-    err.statusCode = HTTP_ERRORS.BAD_REQUEST;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Not available!");
   }
 };
 
 const toggleLikeAndSave = async ({ userId, action }) => {
   const user = await User.findById(userId);
   if (!user) {
-    const err = new Error("user not found!");
-    err.statusCode = 404;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.NOT_FOUND, "user not found!");
   }
 
   if (action === "like") {
@@ -294,9 +277,7 @@ const toggleLikeAndSave = async ({ userId, action }) => {
       };
     }
   } else {
-    const err = new Error("Invalid action");
-    err.statusCode = 400;
-    throw err;
+    throw new ApiError(HTTP_ERRORS.BAD_REQUEST, "Invalid action");
   }
 };
 

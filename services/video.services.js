@@ -31,12 +31,13 @@ const getVideo = async ({ slug }) => {
 };
 
 const processAndSaveVideo = async ({
-  filename,
+  videoFileName,
+  thumbnailFileName,
   userId,
   title,
   description,
 }) => {
-  await cloudinary.uploader.explicit(filename, {
+  await cloudinary.uploader.explicit(videoFileName, {
     resource_type: "video",
     type: "upload",
     eager: [
@@ -47,14 +48,16 @@ const processAndSaveVideo = async ({
     ],
   });
 
-  const hlsUrl = `https://res.cloudinary.com/${process.env.CLD_NAME}/video/upload/sp_full_hd/${filename}.m3u8`;
+  const hlsUrl = `https://res.cloudinary.com/${process.env.CLD_NAME}/video/upload/sp_full_hd/${videoFileName}.m3u8`;
+  const thumbnailUrl = `https://res.cloudinary.com/${process.env.CLD_NAME}/image/upload/${thumbnailFileName}`;
 
   const vidData = {
     userId,
     title,
     description,
     hlsUrl,
-    publicId: filename,
+    thumbnailUrl,
+    publicId: videoFileName,
   };
   const video = await Video.create(vidData);
   if (!video) {
@@ -63,9 +66,10 @@ const processAndSaveVideo = async ({
 
   return {
     url: hlsUrl,
+    thumbnailUrl,
     title,
     description,
-    publicId: filename,
+    publicId: videoFileName,
   };
 };
 

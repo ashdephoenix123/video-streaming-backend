@@ -38,21 +38,33 @@ const getVideo = asyncHandler(async (req, res) => {
 // @access public
 
 const uploadVideo = asyncHandler((req, res) => {
-  upload.single("video")(req, res, async function (err) {
+  const uploadMiddleware = upload.fields([
+    { name: "video", maxCount: 1 },
+    { name: "thumbnail", maxCount: 1 },
+  ]);
+
+  uploadMiddleware(req, res, async function (err) {
     if (err) {
       return res.status(500).json({ error: err.message || "Upload failed" });
     }
 
-    if (!req.file) {
-      return res.status(400).json({ error: "No file received" });
+    const videoFiles = req.files?.["video"];
+    const thumbnailFiles = req.files?.["thumbnail"];
+
+    if (!videoFiles.length || !thumbnailFiles.length) {
+      return res
+        .status(400)
+        .json({ error: "Both Video and thumbnail files are required." });
     }
 
     const { title, description, userId } = req.body;
-    const { filename } = req.file;
+    const videoFileName = videoFiles[0].filename;
+    const thumbnailFileName = thumbnailFiles[0].filename;
 
     try {
       const result = await videoServices.processAndSaveVideo({
-        filename,
+        videoFileName,
+        thumbnailFileName,
         userId,
         title,
         description,

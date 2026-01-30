@@ -2,6 +2,7 @@ const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
+const { generateSlug } = require("../utils/helperFunctions");
 
 cloudinary.config({
   cloud_name: process.env.CLD_NAME,
@@ -15,20 +16,23 @@ const storage = new CloudinaryStorage({
     const rawTitle = req.headers["x-title"] || "untitled";
     const userId = req.headers["x-user-id"] || "anonymous";
 
-    const slug = rawTitle
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+    if (file.fieldname === "video") {
+      const slug = generateSlug(rawTitle);
+      const uuid = uuidv4().slice(0, 6);
 
-    const uuid = uuidv4().slice(0, 6);
-    const timestamp = Date.now();
-
-    return {
-      resource_type: "video",
-      folder: `videos/${userId}`,
-      public_id: `${slug}-${timestamp}-${uuid}`,
-    };
+      return {
+        resource_type: "video",
+        folder: `videos/${userId}`,
+        public_id: `${slug}-${Date.now()}-${uuid}`,
+      };
+    } else if (file.fieldname === "thumbnail") {
+      return {
+        resource_type: "image",
+        folder: `videos/${userId}/thumbnail`,
+        public_id: `thumb-${uuidv4().slice(0, 6)}-${Date.now()}`,
+        allowed_formats: ["jpeg", "png", "jpg", "webp"],
+      };
+    }
   },
 });
 

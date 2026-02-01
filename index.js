@@ -18,7 +18,11 @@ const startServer = async () => {
   // --> All your app logic goes inside here
   app.use(
     cors({
-      origin: ["http://localhost:3000", "https://flix-stream-azure.vercel.app"],
+      origin: [
+        "http://localhost:3000",
+        "https://flix-stream-azure.vercel.app",
+        "http://flixstream.online",
+      ],
       credentials: true,
     }),
   );

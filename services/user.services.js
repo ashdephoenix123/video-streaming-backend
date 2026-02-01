@@ -53,10 +53,10 @@ const loginUser = async ({ email, password }) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV == "production",
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV == "production" ? "none" : "lax",
+    domain: ".flixstream.online",
     maxAge: 60 * 60 * 24,
     path: "/",
-    //domain: .yourfrontend.com
   };
   const serialized = serialize("token", token, options);
 

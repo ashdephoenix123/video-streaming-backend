@@ -63,6 +63,7 @@ const logOut = asyncHandler(async (req, res) => {
     sameSite: process.env.NODE_ENV == "production" ? "none" : "lax",
     expires: new Date(0),
     path: "/",
+    domain: ".flixstream.online",
   });
 
   res.setHeader("Set-Cookie", serialized);

@@ -57,6 +57,7 @@ const loginUser = async ({ email, password }) => {
     domain: ".flixstream.online",
     maxAge: 60 * 60 * 24,
     path: "/",
+    domain: ".flixstream.online",
   };
   const serialized = serialize("token", token, options);
 

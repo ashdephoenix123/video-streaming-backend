@@ -12,14 +12,6 @@ const port = process.env.PORT || 5000;
 
 // --> Create the async function
 const startServer = async () => {
-  // --> Load secrets ONLY when not in development
-  if (process.env.NODE_ENV !== "development") {
-    console.log("Production environment detected, loading secrets...");
-    await loadSecrets();
-  } else {
-    console.log("Development environment, using .env file.");
-  }
-
   // --> Call connectDB() *after* secrets are loaded
   connectDB();
 

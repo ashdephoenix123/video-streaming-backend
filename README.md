@@ -17,5 +17,5 @@ NODE_ENV
 - MongoDB
 
 **More Info - For Personal Use**
-- Deployed on Render via primary Gmail.
+- Deployed on Digital Ocean VPS via primary Gmail.
 - Cloudinary account with primary Github.

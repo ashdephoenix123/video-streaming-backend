@@ -6,6 +6,7 @@ const { errorHandler } = require("./middleware/errorHandler");
 const connectDB = require("./config/dbConnection");
 const cookieParser = require("cookie-parser");
 const { loadSecrets } = require("./config/secrets"); // <-- The secret loader
+const client = require("./config/redis");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -14,6 +15,9 @@ const port = process.env.PORT || 5000;
 const startServer = async () => {
   // --> Call connectDB() *after* secrets are loaded
   connectDB();
+
+  // connect redis client
+  await client.connect();
 
   // --> All your app logic goes inside here
   app.use(

@@ -9,6 +9,8 @@ const SubscriptionModel = require("../models/SubscriptionModel");
 const userServices = require("../services/user.services");
 const HTTP_ERRORS = require("../constants");
 const ApiError = require("../utils/ApiError");
+const client = require("../config/redis");
+const { cachedUserVideoKey } = require("../utils/helperFunctions");
 
 // @desc register user
 // @route POST /api/user/register
@@ -87,10 +89,23 @@ const getUser = asyncHandler(async (req, res) => {
 const getUserVideos = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-
   const { userId } = req.params;
-  const videos = await userServices.fetchUserVideos({ userId, page, limit });
-  res.status(200).json(videos);
+
+  const cachedKey = cachedUserVideoKey(userId);
+
+  // try to fetch user videos from redis cache
+  const cachedVideos = await client.get(cachedKey);
+  if (cachedVideos) {
+    console.log("⚡️ Serving from Redis Cache - User Videos");
+    res.status(200).json(JSON.parse(cachedVideos));
+  } else {
+    console.log("🐢 Fetching from Database - No cache found for user videos");
+    const videos = await userServices.fetchUserVideos({ userId, page, limit });
+
+    // Save to redis with expiration time
+    await client.set(cachedKey, JSON.stringify(videos), { expiration: 86400 }); // 1 day expiration time
+    res.status(200).json(videos);
+  }
 });
 
 // @desc Post user avatar

@@ -5,6 +5,7 @@ const videoServices = require("../services/video.services");
 const { upload, cloudinary } = require("../config/cloudinary");
 const asyncHandler = require("express-async-handler");
 const HTTP_ERRORS = require("../constants");
+const client = require("../config/redis");
 
 // Test
 const isitworking = asyncHandler(async (req, res) => {
@@ -69,6 +70,11 @@ const uploadVideo = asyncHandler((req, res) => {
         title,
         description,
       });
+
+      // reset Redis Cache
+      const cachedKey = cachedUserVideoKey(userId);
+      await client.del(cachedKey);
+
       res.status(201).json(result);
     } catch (e) {
       console.error("❌ HLS generation error:", e);

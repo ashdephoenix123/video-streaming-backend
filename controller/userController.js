@@ -96,17 +96,12 @@ const getUserVideos = asyncHandler(async (req, res) => {
   // try to fetch user videos from redis cache
   const cachedVideos = await client.get(cachedKey);
   if (cachedVideos) {
-    console.log("⚡️ Serving from Redis Cache - User Videos");
     res.status(200).json(JSON.parse(cachedVideos));
   } else {
-    console.log("🐢 Fetching from Database - No cache found for user videos");
     const videos = await userServices.fetchUserVideos({ userId, page, limit });
 
     // Save to redis with expiration time
-    console.log("Before Setting Cache!");
     await client.set(cachedKey, JSON.stringify(videos), { EX: 86400 }); // 1 day expiration time
-    console.log("After Setting Cache!");
-
     res.status(200).json(videos);
   }
 });

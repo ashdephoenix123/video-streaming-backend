@@ -103,7 +103,10 @@ const getUserVideos = asyncHandler(async (req, res) => {
     const videos = await userServices.fetchUserVideos({ userId, page, limit });
 
     // Save to redis with expiration time
-    await client.set(cachedKey, JSON.stringify(videos), { expiration: 86400 }); // 1 day expiration time
+    console.log("Before Setting Cache!");
+    await client.set(cachedKey, JSON.stringify(videos), { EX: 86400 }); // 1 day expiration time
+    console.log("After Setting Cache!");
+
     res.status(200).json(videos);
   }
 });

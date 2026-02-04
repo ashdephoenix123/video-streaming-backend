@@ -33,7 +33,8 @@ const errorHandler = (err, req, res, next) => {
   let response = {
     title,
     message: err.message,
-    ...(process.env.NODE_ENV !== "production" ? { error: err.stack } : {}),
+    error: err.stack,
+    // ...(process.env.NODE_ENV !== "production" ? { error: err.stack } : {}),
   };
 
   return res.status(statusCode).json(response);

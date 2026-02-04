@@ -84,7 +84,8 @@ const fetchUserVideos = async ({ userId, page, limit }) => {
   const videos = await Video.find({ userId })
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
-    .limit(limit);
+    .limit(limit)
+    .lean();
   if (!videos) {
     throw new ApiError(
       HTTP_ERRORS.BAD_REQUEST,

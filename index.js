@@ -21,7 +21,7 @@ const startServer = async () => {
   // }
 
   // --> Call connectDB() *after* secrets are loaded
-  connectDB();
+  await connectDB();
 
   // --> All your app logic goes inside here
   app.use(

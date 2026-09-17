@@ -37,6 +37,13 @@ const startServer = async () => {
   app.use("/api/auth", require("./routes/auth"));
   app.use("/api/user", require("./routes/userRoute"));
   app.use("/api", require("./routes/videosRoute"));
+
+  app.use((req, res, next) => {
+    const error = new Error(`Route ${req.method} does not exist!`)
+    error.statusCode = 404;
+    next(error)
+  })
+
   app.use(errorHandler);
 
   app.listen(port, () =>

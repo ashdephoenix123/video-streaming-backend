@@ -12,6 +12,7 @@ const port = process.env.PORT || 5000;
 
 // --> Create the async function
 const startServer = async () => {
+
   // --> Load secrets ONLY when not in development
   // if (process.env.NODE_ENV !== "development") {
   //   console.log("Production environment detected, loading secrets...");
@@ -37,6 +38,10 @@ const startServer = async () => {
   app.use("/api/auth", require("./routes/auth"));
   app.use("/api/user", require("./routes/userRoute"));
   app.use("/api", require("./routes/videosRoute"));
+  app.use("/api/images", require("./routes/imageRoute")); // <-- NEW!
+
+  // Start background workers
+  require("./workers/imageWorker"); // <-- NEW!
 
   app.use((req, res, next) => {
     const error = new Error(`Route ${req.method} does not exist!`)
